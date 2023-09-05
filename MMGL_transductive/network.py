@@ -21,9 +21,10 @@ from layers import *
 
 
 class VLTransformer(nn.Module):
-    def __init__(self, input_data_dims, hyperpm):
+    def __init__(self, input_data_dims, hyperpm, dev):
         super(VLTransformer, self).__init__()
         self.hyperpm = hyperpm
+        self.dev = dev
         self.input_data_dims = input_data_dims
         self.d_q = hyperpm.n_hidden
         self.d_k = hyperpm.n_hidden
@@ -35,7 +36,7 @@ class VLTransformer(nn.Module):
         self.n_class = hyperpm.nclass
         self.d_out = self.d_v * self.n_head * self.modal_num
         
-        self.InputLayer = VariLengthInputLayer(self.input_data_dims, self.d_k, self.d_v, self.n_head, self.dropout)
+        self.InputLayer = VariLengthInputLayer(self.input_data_dims, self.d_k, self.d_v, self.n_head, self.dropout, self.dev)
         self.Encoder = []
         self.FeedForward = []
         
@@ -74,9 +75,10 @@ class VLTransformer(nn.Module):
     
     
 class VLTransformer_Gate(nn.Module):
-    def __init__(self, input_data_dims, hyperpm):
+    def __init__(self, input_data_dims, hyperpm, dev):
         super(VLTransformer_Gate, self).__init__()
         self.hyperpm = hyperpm
+        self.dev = dev
         self.input_data_dims = input_data_dims
         self.d_q = hyperpm.n_hidden
         self.d_k = hyperpm.n_hidden
@@ -88,7 +90,7 @@ class VLTransformer_Gate(nn.Module):
         self.n_class = hyperpm.nclass
         self.d_out = self.d_v * self.n_head * self.modal_num
         
-        self.InputLayer = VariLengthInputLayer(self.input_data_dims, self.d_k, self.d_v, self.n_head, self.dropout)
+        self.InputLayer = VariLengthInputLayer(self.input_data_dims, self.d_k, self.d_v, self.n_head, self.dropout, self.dev)
         self.Encoder = []
         self.FeedForward = []
         

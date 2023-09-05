@@ -59,7 +59,7 @@ class FeedForwardLayer(nn.Module):
         return x    
     
 class VariLengthInputLayer(nn.Module):
-    def __init__(self, input_data_dims, d_k, d_v, n_head, dropout, dev=torch.device("cpu")):
+    def __init__(self, input_data_dims, d_k, d_v, n_head, dropout, dev):
         super(VariLengthInputLayer, self).__init__()
         self.n_head = n_head
         self.dims = input_data_dims

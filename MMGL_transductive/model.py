@@ -21,7 +21,7 @@ from utils import *
 
 
 class EvalHelper:
-    def __init__(self, input_data_dims, feat, label, hyperpm, train_index, test_index, dev=torch.device("cpu")):
+    def __init__(self, input_data_dims, feat, label, hyperpm, train_index, test_index, dev):
         feat = torch.from_numpy(feat).float().to(dev)
         label = torch.from_numpy(label).long().to(dev)
         self.dev = dev
@@ -56,9 +56,9 @@ class EvalHelper:
         self.out_dim = self.d_v * self.n_head + self.modal_num**2
         self.weight = torch.from_numpy(weight).float().to(dev)
         if self.MF_mode == 'sum':
-            self.ModalFusion = VLTransformer_Gate(input_data_dims, hyperpm).to(dev)
+            self.ModalFusion = VLTransformer_Gate(input_data_dims, hyperpm, dev).to(dev)
         else:
-            self.ModalFusion = VLTransformer(input_data_dims, hyperpm).to(dev)
+            self.ModalFusion = VLTransformer(input_data_dims, hyperpm, dev).to(dev)
         self.GraphConstruct = GraphLearn(self.out_dim, th = self.th, mode = self.GC_mode).to(dev)
         
         if self.MP_mode == 'GCN':
@@ -101,7 +101,7 @@ class EvalHelper:
             adj = self.GraphConstruct(fusion_feat)
             graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity, self.dev)
             
-            normalized_adj = normalize_adj(adj + torch.eye(adj.size(0)).to(dev))
+            normalized_adj = normalize_adj(adj + torch.eye(adj.size(0), device=dev))
             prob, xx = self.MessagePassing(fusion_feat, normalized_adj)
             cls_loss = ClsLoss(prob, self.targ, self.trn_idx, self.weight)
             
