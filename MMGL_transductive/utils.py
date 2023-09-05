@@ -23,7 +23,7 @@ def real2col(x):
 
 
 def one_hot(x, class_count):
-    return torch.eye(class_count)[x,:]
+    return torch.eye(class_count)[x.cpu(),:]
 
 
 def GraphConstructLoss(feat, adj, theta_smooth, theta_degree, theta_sparsity, dev=torch.device("cpu")):

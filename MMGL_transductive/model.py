@@ -143,7 +143,7 @@ class EvalHelper:
             fusion_feat = embedding.detach()
             adj = self.GraphConstruct(fusion_feat)
             graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity, self.dev)
-            normalized_adj = normalize_adj(adj + torch.eye(adj.size(0)).to(dev))
+            normalized_adj = normalize_adj(adj + torch.eye(adj.size(0), device=dev))
             prob, xx = self.MessagePassing(fusion_feat, normalized_adj)
             cls_loss = ClsLoss(prob, self.targ, self.trn_idx, self.weight)
             
@@ -170,7 +170,7 @@ class EvalHelper:
                 
                 prob, fusion_feat, attn = self.ModalFusion(self.feat)
                 adj = self.GraphConstruct(fusion_feat)
-                normalized_adj = normalize_adj(adj + torch.eye(adj.size(0)).to(dev))
+                normalized_adj = normalize_adj(adj + torch.eye(adj.size(0), device=dev))
                 prob2, xx = self.MessagePassing(fusion_feat, normalized_adj)
                 cls_loss = ClsLoss(prob, self.targ, self.trn_idx, self.weight)
                 
@@ -187,7 +187,7 @@ class EvalHelper:
                 self.optimizer_MP.zero_grad() 
                 prob, fusion_feat, attn = self.ModalFusion(self.feat)
                 adj = self.GraphConstruct(fusion_feat)
-                adj = normalize_adj(adj + torch.eye(adj.size(0)).to(dev))
+                adj = normalize_adj(adj + torch.eye(adj.size(0), device=dev))
                 prob, xx = self.MessagePassing(fusion_feat, adj)
                 cls_loss = ClsLoss(prob, self.targ, self.trn_idx, self.weight)
                 
@@ -221,7 +221,7 @@ class EvalHelper:
                 
                 prob, fusion_feat, attn = self.ModalFusion(self.feat)
                 adj = self.GraphConstruct(fusion_feat)
-                normalized_adj = normalize_adj(adj + torch.eye(adj.size(0)).to(dev))
+                normalized_adj = normalize_adj(adj + torch.eye(adj.size(0), device=dev))
                 prob2, xx = self.MessagePassing(fusion_feat, normalized_adj)
                 cls_loss = ClsLoss(prob, self.targ, self.trn_idx, self.weight)
                 
@@ -246,7 +246,7 @@ class EvalHelper:
                 self.optimizer_MP.zero_grad() 
                 prob, fusion_feat, attn = self.ModalFusion(self.feat)
                 adj = self.GraphConstruct(fusion_feat)
-                adj = normalize_adj(adj + torch.eye(adj.size(0)).to(dev))
+                adj = normalize_adj(adj + torch.eye(adj.size(0), device=dev))
                 prob, xx = self.MessagePassing(fusion_feat, adj)
                 cls_loss = ClsLoss(prob, self.targ, self.trn_idx, self.weight)
                 
@@ -298,17 +298,17 @@ class EvalHelper:
             prob_MF, fusion_feat, attn = self.ModalFusion(self.feat)
             adj = self.GraphConstruct(fusion_feat)
             _adj = adj.clone().detach()
-            adj = normalize_adj(adj + torch.eye(adj.size(0)).to(self.dev))
+            adj = normalize_adj(adj + torch.eye(adj.size(0), device=self.dev))
             if self.hyperpm.datname == 'TADPOLE':
-                supplement_share = torch.zeros(fusion_feat[:, -36:].shape).to(fusion_feat.device)
-                supplement_sp = torch.zeros(fusion_feat[:, :-36].shape).to(fusion_feat.device)
+                supplement_share = torch.zeros(fusion_feat[:, -36:].shape, device=fusion_feat.device)
+                supplement_sp = torch.zeros(fusion_feat[:, :-36].shape, device=fusion_feat.device)
                 shared_emb = torch.cat((fusion_feat[:, :-36], supplement_share), dim=-1)
                 sp_emb = torch.cat((fusion_feat[:, -36:], supplement_sp), dim=-1)
                 shared_prob, xx = self.MessagePassing(shared_emb, adj)
                 sp_prob, xx = self.MessagePassing(sp_emb, adj)
             elif self.hyperpm.datname == 'ABIDE':
-                supplement_share = torch.zeros(fusion_feat[:, -16:].shape).to(fusion_feat.device)
-                supplement_sp = torch.zeros(fusion_feat[:, :-16].shape).to(fusion_feat.device)
+                supplement_share = torch.zeros(fusion_feat[:, -16:].shape, device=fusion_feat.device)
+                supplement_sp = torch.zeros(fusion_feat[:, :-16].shape, device=fusion_feat.device)
                 shared_emb = torch.cat((fusion_feat[:, :-16], supplement_share), dim=-1)
                 sp_emb = torch.cat((fusion_feat[:, -16:], supplement_sp), dim=-1)
                 shared_prob, xx = self.MessagePassing(shared_emb, adj)
@@ -339,7 +339,7 @@ class EvalHelper:
             prob_MF, fusion_feat, attn = self.ModalFusion(self.feat)
             adj = self.GraphConstruct(fusion_feat)
             _adj = adj.clone().detach()
-            adj = normalize_adj(adj + torch.eye(adj.size(0)).to(self.dev))
+            adj = normalize_adj(adj + torch.eye(adj.size(0), device=self.dev))
             prob, xx = self.MessagePassing(fusion_feat, adj)
         prob = prob[eval_idx]
         targ = self.targ[eval_idx]
@@ -366,7 +366,7 @@ class EvalHelper:
         self.MessagePassing.eval()
         prob, fusion_feat, attn = self.ModalFusion(self.feat)
         adj = self.GraphConstruct(fusion_feat)
-        adj = normalize_adj(adj + torch.eye(adj.size(0)).to(self.dev))
+        adj = normalize_adj(adj + torch.eye(adj.size(0), device=self.dev))
         prob, xx = self.MessagePassing(fusion_feat, adj)
         prob = prob[eval_idx]
         targ = self.targ[eval_idx]
@@ -383,7 +383,7 @@ class EvalHelper:
         
         prob_MF, fusion_feat, attn = self.ModalFusion(self.feat)
         adj_o = self.GraphConstruct(fusion_feat)
-        adj = normalize_adj(adj_o + torch.eye(adj_o.size(0)).to(self.dev))
+        adj = normalize_adj(adj_o + torch.eye(adj_o.size(0), device=self.dev))
         prob, xx = self.MessagePassing(fusion_feat, adj)
         prob = prob[eval_idx]
         targ = self.targ[eval_idx]
