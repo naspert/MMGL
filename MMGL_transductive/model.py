@@ -21,9 +21,7 @@ from utils import *
 
 
 class EvalHelper:
-    def __init__(self, input_data_dims, feat, label, hyperpm, train_index, test_index):
-        use_cuda = torch.cuda.is_available()
-        dev = torch.device('cuda' if use_cuda else 'cpu')
+    def __init__(self, input_data_dims, feat, label, hyperpm, train_index, test_index, dev=torch.device("cpu")):
         feat = torch.from_numpy(feat).float().to(dev)
         label = torch.from_numpy(label).long().to(dev)
         self.dev = dev
@@ -101,7 +99,7 @@ class EvalHelper:
             prob, fusion_feat, attn = self.ModalFusion(self.feat)
             
             adj = self.GraphConstruct(fusion_feat)
-            graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity)
+            graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity, self.dev)
             
             normalized_adj = normalize_adj(adj + torch.eye(adj.size(0)).to(dev))
             prob, xx = self.MessagePassing(fusion_feat, normalized_adj)
@@ -144,7 +142,7 @@ class EvalHelper:
             _, embedding, attn = self.ModalFusion(self.feat)
             fusion_feat = embedding.detach()
             adj = self.GraphConstruct(fusion_feat)
-            graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity)
+            graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity, self.dev)
             normalized_adj = normalize_adj(adj + torch.eye(adj.size(0)).to(dev))
             prob, xx = self.MessagePassing(fusion_feat, normalized_adj)
             cls_loss = ClsLoss(prob, self.targ, self.trn_idx, self.weight)
@@ -176,7 +174,7 @@ class EvalHelper:
                 prob2, xx = self.MessagePassing(fusion_feat, normalized_adj)
                 cls_loss = ClsLoss(prob, self.targ, self.trn_idx, self.weight)
                 
-                graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity)
+                graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity, self.dev)
                 total_loss = cls_loss + graph_loss
                 print('cls_loss: %.4f, graph_loss: %.4f' % (cls_loss, graph_loss))
                 loss_MF += total_loss.item()
@@ -193,7 +191,7 @@ class EvalHelper:
                 prob, xx = self.MessagePassing(fusion_feat, adj)
                 cls_loss = ClsLoss(prob, self.targ, self.trn_idx, self.weight)
                 
-                graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity)
+                graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity, self.dev)
                 total_loss = cls_loss + graph_loss
                 loss_GC += total_loss.item()
                 total_loss.backward()
@@ -227,7 +225,7 @@ class EvalHelper:
                 prob2, xx = self.MessagePassing(fusion_feat, normalized_adj)
                 cls_loss = ClsLoss(prob, self.targ, self.trn_idx, self.weight)
                 
-                graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity)
+                graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity, self.dev)
                 total_loss = cls_loss + graph_loss
                 print('cls_loss: %.4f , : %.4f' % (cls_loss, graph_loss))
                 loss_MF += total_loss.item()
@@ -252,7 +250,7 @@ class EvalHelper:
                 prob, xx = self.MessagePassing(fusion_feat, adj)
                 cls_loss = ClsLoss(prob, self.targ, self.trn_idx, self.weight)
                 
-                graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity)
+                graph_loss = GraphConstructLoss(fusion_feat, adj, self.hyperpm.theta_smooth, self.hyperpm.theta_degree, self.hyperpm.theta_sparsity, self.dev)
                 total_loss = cls_loss + graph_loss
                 loss_GC += total_loss.item()
                 total_loss.backward()

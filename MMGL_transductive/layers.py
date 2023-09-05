@@ -59,7 +59,7 @@ class FeedForwardLayer(nn.Module):
         return x    
     
 class VariLengthInputLayer(nn.Module):
-    def __init__(self, input_data_dims, d_k, d_v, n_head, dropout):
+    def __init__(self, input_data_dims, d_k, d_v, n_head, dropout, dev=torch.device("cpu")):
         super(VariLengthInputLayer, self).__init__()
         self.n_head = n_head
         self.dims = input_data_dims
@@ -68,6 +68,7 @@ class VariLengthInputLayer(nn.Module):
         self.w_qs = []
         self.w_ks = []
         self.w_vs = []
+        self.dev = dev
         for i, dim in enumerate(self.dims):
             self.w_q = nn.Linear(dim, n_head * d_k, bias = False)
             self.w_k = nn.Linear(dim, n_head * d_k, bias = False)
@@ -91,9 +92,9 @@ class VariLengthInputLayer(nn.Module):
         temp_dim = 0
         bs = input_data.size(0)
         modal_num = len(self.dims)
-        q = torch.zeros(bs, modal_num, self.n_head * self.d_k).cuda()
-        k = torch.zeros(bs, modal_num, self.n_head * self.d_k).cuda()
-        v = torch.zeros(bs, modal_num, self.n_head * self.d_v).cuda()
+        q = torch.zeros(bs, modal_num, self.n_head * self.d_k, device=self.dev)
+        k = torch.zeros(bs, modal_num, self.n_head * self.d_k, device=self.dev)
+        v = torch.zeros(bs, modal_num, self.n_head * self.d_v, device=self.dev)
         for i in range(modal_num):
             w_q = self.w_qs[i]
             w_k = self.w_ks[i]

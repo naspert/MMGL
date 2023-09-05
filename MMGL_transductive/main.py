@@ -91,7 +91,7 @@ def train_and_eval(datadir, datname, hyperpm):
         hyperpm.nmodal = 4
     #np.random.shuffle(data)
     
-    use_cuda = torch.cuda.is_available()
+    use_cuda = torch.cuda.is_available() and not hyperpm.cpu
     dev = torch.device('cuda' if use_cuda else 'cpu')
     input_data_dims = []
     for i in modal_feat_dict.keys():
@@ -108,7 +108,7 @@ def train_and_eval(datadir, datname, hyperpm):
     clk = 0
     for train_index, test_index in skf.split(input_data, label):
         clk += 1
-        agent = EvalHelper(input_data_dims, input_data, label, hyperpm, train_index, test_index)
+        agent = EvalHelper(input_data_dims, input_data, label, hyperpm, train_index, test_index, dev)
         tm = time.time()
         best_val_acc, wait_cnt = 0.0, 0
         model_sav = tempfile.TemporaryFile()
